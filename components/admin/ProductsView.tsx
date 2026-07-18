@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { CATEGORIES, getProductsByCategory, StaticProduct } from '@/lib/products-data'
 import { PromoModal } from './PromoModal'
 import { ProductEditModal, type ProductEdits } from './ProductEditModal'
@@ -10,6 +11,7 @@ type StatusMap = Record<string, boolean>
 type EditsMap = Record<string, ProductEdits>
 
 export function ProductsView() {
+  const router = useRouter()
   const [activeCategory, setActiveCategory] = useState('hamburguesas')
   const [search, setSearch] = useState('')
   const [statusMap, setStatusMap] = useState<StatusMap>({})
@@ -115,6 +117,28 @@ export function ProductsView() {
             <path d="m21 21-4.35-4.35" />
           </svg>
         </div>
+
+        <button
+          onClick={() => router.push('/admin/exportar')}
+          style={{
+            background: 'transparent',
+            border: '1.5px solid rgba(255,255,255,0.12)',
+            borderRadius: 8,
+            padding: '9px 16px',
+            color: 'rgba(255,255,255,0.7)',
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: 700,
+            fontSize: 15,
+            letterSpacing: 0.5,
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+          }}
+        >
+          🖨 IMPRIMIR CARTA
+        </button>
 
         <button
           style={{
