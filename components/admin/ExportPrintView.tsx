@@ -17,6 +17,21 @@ const PREVIEW_WIDTH = 340
 
 const LOGO_PRINT = `${BISTROBURGER_LOGO_URL}?tr=w-400,q-100`
 
+const CONTACT = {
+  web: 'bistroburguer.es',
+  phone: '925 092 711',
+  instagram: '@bistroburguer.es',
+  facebook: '/bistroburger.es',
+  tiktok: '@bistroburger',
+}
+
+// Fondo de portada: brasas y humo (generado con Gemini) + degradado de legibilidad encima
+const COVER_BG_IMAGE = '/images/cover-bg.png'
+const COVER_BG = [
+  'linear-gradient(180deg, rgba(5,3,2,0.6) 0%, rgba(5,3,2,0.12) 32%, rgba(5,3,2,0.1) 55%, rgba(5,3,2,0.45) 100%)',
+  `url('${COVER_BG_IMAGE}')`,
+].join(', ')
+
 const INCLUDES_NOTE: Record<string, string> = {
   hamburguesas: 'Incluye patatas fritas o aros de cebolla · +1€ boniatos fritos',
   exclusivas: 'Incluye patatas fritas o aros de cebolla · +1€ boniatos fritos',
@@ -62,10 +77,16 @@ export function ExportPrintView() {
       <style>{`
         @page { size: ${dims.w}mm ${dims.h}mm; margin: 0; }
         @media print {
+          html, body { margin: 0; padding: 0; background: #fff; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           body * { visibility: hidden; }
           #print-area, #print-area * { visibility: visible; }
           #print-area { position: absolute; top: 0; left: 0; margin: 0; }
-          .print-page { page-break-after: always; }
+          .print-page {
+            width: ${dims.w}mm;
+            min-height: ${dims.h}mm;
+            page-break-after: always;
+          }
           .print-page:last-child { page-break-after: auto; }
         }
         #print-area { display: none; }
@@ -199,6 +220,35 @@ export function ExportPrintView() {
 
         {/* Preview */}
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 1 }}>Portada</div>
+            <div
+              style={{
+                width: PREVIEW_WIDTH,
+                height: pageHeightPx * scale,
+                overflow: 'hidden',
+                position: 'relative',
+                background: '#0F0A09',
+                boxShadow: '0 6px 28px rgba(0,0,0,0.5)',
+                borderRadius: 2,
+              }}
+            >
+              <div
+                style={{
+                  width: pageWidthPx,
+                  height: pageHeightPx,
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }}
+              >
+                <CoverPage />
+              </div>
+            </div>
+          </div>
+
           {pageGroups.map((catIds, idx) => (
             <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 1 }}>
@@ -210,7 +260,7 @@ export function ExportPrintView() {
                   height: pageHeightPx * scale,
                   overflow: 'hidden',
                   position: 'relative',
-                  background: '#fff',
+                  background: '#FDFBF6',
                   boxShadow: '0 6px 28px rgba(0,0,0,0.5)',
                   borderRadius: 2,
                 }}
@@ -236,17 +286,106 @@ export function ExportPrintView() {
 
       {/* Área real usada por el navegador al imprimir (fuera de pantalla) */}
       <div id="print-area">
+        <div className="print-page" style={{ width: `${dims.w}mm`, height: `${dims.h}mm`, background: '#0F0A09' }}>
+          <CoverPage />
+        </div>
         {pageGroups.map((catIds, idx) => (
           <div
             key={idx}
             className="print-page"
-            style={{ width: `${dims.w}mm`, minHeight: `${dims.h}mm` }}
+            style={{ width: `${dims.w}mm`, minHeight: `${dims.h}mm`, background: '#fff' }}
           >
             <PrintPage categoryIds={catIds} compact={compact} columns={printColumns} showHeader={idx === 0} />
           </div>
         ))}
       </div>
     </div>
+  )
+}
+
+function CoverPage() {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        background: COVER_BG,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        color: '#fff',
+        boxSizing: 'border-box',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        padding: '40px',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Marco decorativo */}
+      <div style={{ position: 'absolute', inset: '14px', border: '1px solid rgba(255,255,255,0.14)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: '18px', border: '1px solid rgba(227,32,36,0.28)', pointerEvents: 'none' }} />
+
+      <div style={{ width: 130, height: 130, borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 0 3px rgba(227,32,36,0.5), 0 8px 40px rgba(0,0,0,0.6)', marginBottom: 28, position: 'relative' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={LOGO_PRINT} alt="Bistroburger" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+      </div>
+
+      <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 42, letterSpacing: 4, textTransform: 'uppercase', lineHeight: 1 }}>
+        Bistroburger
+      </div>
+      <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 4, color: '#E32024', textTransform: 'uppercase', marginTop: 8 }}>
+        Toledo — Carta
+      </div>
+
+      <div style={{ width: 56, height: 2, background: '#E32024', margin: '34px 0' }} />
+
+      <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 20, letterSpacing: 1, color: '#F26B30' }}>
+        {CONTACT.web}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 10, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.75)' }}>
+        <PhoneIcon size={13} color="rgba(255,255,255,0.6)" />
+        {CONTACT.phone}
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          gap: 22,
+          marginTop: 26,
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 11.5,
+          color: 'rgba(255,255,255,0.5)',
+          letterSpacing: 0.3,
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icons/instagram.svg" alt="Instagram" style={{ width: 15, height: 15, display: 'block' }} />
+          {CONTACT.instagram}
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icons/facebook.svg" alt="Facebook" style={{ width: 15, height: 15, display: 'block' }} />
+          {CONTACT.facebook}
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icons/tiktok.svg" alt="TikTok" style={{ width: 15, height: 15, display: 'block' }} />
+          {CONTACT.tiktok}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function PhoneIcon({ size = 14, color = '#fff' }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
   )
 }
 
@@ -266,7 +405,7 @@ function PrintPage({
       style={{
         width: '100%',
         height: '100%',
-        background: '#fff',
+        background: '#FDFBF6',
         color: '#1A1210',
         fontFamily: "'DM Sans', sans-serif",
         padding: compact ? '18px 22px' : '26px 30px',
@@ -274,7 +413,7 @@ function PrintPage({
       }}
     >
       {showHeader && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: compact ? 10 : 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: compact ? 12 : 20, paddingBottom: compact ? 10 : 14, borderBottom: '1px solid rgba(26,18,16,0.1)' }}>
           <div style={{ width: compact ? 34 : 46, height: compact ? 34 : 46, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, boxShadow: '0 0 0 1px rgba(0,0,0,0.08)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={LOGO_PRINT} alt="Bistroburger" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
@@ -303,13 +442,13 @@ function PrintPage({
                 style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 700,
-                  fontSize: compact ? 11 : 14,
+                  fontSize: compact ? 12.5 : 16,
                   letterSpacing: 2,
                   color: '#E32024',
                   textTransform: 'uppercase',
                   borderBottom: '1.5px solid #E32024',
                   paddingBottom: 3,
-                  marginBottom: compact ? 5 : 8,
+                  marginBottom: compact ? 6 : 9,
                   breakAfter: 'avoid',
                 }}
               >
@@ -317,7 +456,7 @@ function PrintPage({
               </div>
 
               {note && (
-                <div style={{ fontSize: compact ? 7 : 9, color: '#888', fontStyle: 'italic', marginBottom: compact ? 4 : 6 }}>
+                <div style={{ fontSize: compact ? 8 : 10, color: '#888', fontStyle: 'italic', marginBottom: compact ? 5 : 7 }}>
                   {note}
                 </div>
               )}
@@ -328,13 +467,13 @@ function PrintPage({
                   style={{
                     display: 'flex',
                     alignItems: compact ? 'baseline' : 'center',
-                    gap: compact ? 6 : 10,
-                    marginBottom: compact ? 4 : 9,
+                    gap: compact ? 7 : 11,
+                    marginBottom: compact ? 5 : 11,
                     breakInside: 'avoid',
                   }}
                 >
                   {!compact && (
-                    <div style={{ width: 34, height: 34, borderRadius: 5, overflow: 'hidden', flexShrink: 0, background: '#f0f0f0' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: '#f0ece4', boxShadow: '0 0 0 1px rgba(26,18,16,0.08)' }}>
                       {p.images?.[0] && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -347,22 +486,22 @@ function PrintPage({
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                      <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 600, fontSize: compact ? 8.5 : 11.5, color: '#1A1210' }}>
+                      <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 600, fontSize: compact ? 10 : 13, color: '#1A1210' }}>
                         {p.name}
                       </span>
                       {p.is_new && (
-                        <span style={{ fontSize: compact ? 5.5 : 7, background: '#E32024', color: '#fff', borderRadius: 3, padding: '1px 4px', fontWeight: 700, letterSpacing: 0.5 }}>
+                        <span style={{ fontSize: compact ? 6.5 : 8, background: '#E32024', color: '#fff', borderRadius: 3, padding: '1px 4px', fontWeight: 700, letterSpacing: 0.5 }}>
                           NUEVA
                         </span>
                       )}
                     </div>
                     {p.description && (
-                      <div style={{ fontSize: compact ? 6.5 : 8.5, color: '#666', lineHeight: 1.35, marginTop: 1 }}>
+                      <div style={{ fontSize: compact ? 7.5 : 10, color: '#666', lineHeight: 1.4, marginTop: 1 }}>
                         {p.description}
                       </div>
                     )}
                   </div>
-                  <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: compact ? 8.5 : 11.5, color: '#F26B30', flexShrink: 0 }}>
+                  <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: compact ? 10 : 13, color: '#F26B30', flexShrink: 0 }}>
                     {p.price}
                   </span>
                 </div>
